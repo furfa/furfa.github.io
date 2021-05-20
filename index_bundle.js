@@ -1701,9 +1701,9 @@ const pano2_url = __webpack_require__(/*! ../img/pano2.jpg */ "./img/pano2.jpg")
 
 const pano_wellcome_url = __webpack_require__(/*! ../img/pano_wellcome.jpg */ "./img/pano_wellcome.jpg").default;
 
-const steve_url = 'models/steve/scene.gltf'; // require('../models/steve/scene.gltf').default;
+const steve_url = '../models/steve/scene.gltf'; // require('../models/steve/scene.gltf').default;
 
-const apple_url = 'models/apple/scene.gltf'; // require('../models/apple/scene.gltf').default;
+const apple_url = '../models/apple/scene.gltf'; // require('../models/apple/scene.gltf').default;
 // Try to maximize
 
 function download(url) {
