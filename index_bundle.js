@@ -971,14 +971,14 @@ const defaultActions = [{
   order: []
 }];
 class Food extends _NPC__WEBPACK_IMPORTED_MODULE_0__.NPC {
-  constructor(name, path, eatCost = 1) {
+  constructor(name, path, eatCost = 1, scale = {
+    x: 0.4,
+    y: 0.4,
+    z: 0.4
+  }) {
     super(name, path, defaultActions);
     this.name = `food_${name}`;
-    this.usualScale = {
-      x: 0.4,
-      y: 0.4,
-      z: 0.4
-    };
+    this.usualScale = scale;
     this.eatCost = eatCost;
   } // When someone eat object we need to remove it from scene
 
@@ -1674,7 +1674,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   "init": () => (/* binding */ init),
 /* harmony export */   "MAIN_NPC": () => (/* binding */ MAIN_NPC),
-/* harmony export */   "APPLE_FOOD": () => (/* binding */ APPLE_FOOD),
+/* harmony export */   "SANDWICH_FOOD": () => (/* binding */ SANDWICH_FOOD),
 /* harmony export */   "STATUS_BAR": () => (/* binding */ STATUS_BAR),
 /* harmony export */   "panorams": () => (/* binding */ panorams)
 /* harmony export */ });
@@ -1704,7 +1704,8 @@ const pano_wellcome_url = __webpack_require__(/*! ../img/pano_wellcome.jpg */ ".
 const steve_url = '../models/steve/scene.gltf'; // require('../models/steve/scene.gltf').default;
 
 const apple_url = '../models/apple/scene.gltf'; // require('../models/apple/scene.gltf').default;
-// Try to maximize
+
+const sandwich_url = '../models/sandwich/sandwich.gltf'; // Try to maximize
 
 function download(url) {
   window.location.href = url;
@@ -1712,7 +1713,7 @@ function download(url) {
 
 function initWelcomeScreen(viewer, nextPano) {
   console.log('loading welcome screen');
-  let element = document.getElementById("pano-image"); // Blur
+  let element = document.querySelector("#pano-image > canvas"); // Blur
 
   element.style.filter = "blur(5px)";
 
@@ -1792,7 +1793,11 @@ function init() {
 
 const MAIN_NPC = new _NPC__WEBPACK_IMPORTED_MODULE_1__.NPC("steve", steve_url); // export const MAIN_NPC = new NPC("steve", "../models/ded/Ch39_nonPBR.fbx");
 
-const APPLE_FOOD = new _Food__WEBPACK_IMPORTED_MODULE_2__.Food("apple", apple_url);
+const SANDWICH_FOOD = new _Food__WEBPACK_IMPORTED_MODULE_2__.Food("SANDWICH", sandwich_url, 1, {
+  x: 0.1,
+  y: 0.1,
+  z: 0.1
+});
 const STATUS_BAR = new _StatusBar__WEBPACK_IMPORTED_MODULE_4__.StatusBar("food-bar", "", "food-bar", 6);
 STATUS_BAR.load();
 STATUS_BAR.increase(3);
@@ -1815,7 +1820,7 @@ const panorams = [new _PanoramaItem__WEBPACK_IMPORTED_MODULE_3__.PanoramaItem({
     npc: MAIN_NPC,
     pos: new three__WEBPACK_IMPORTED_MODULE_5__.Vector3(20, 0, 40)
   }, {
-    npc: APPLE_FOOD,
+    npc: SANDWICH_FOOD,
     pos: new three__WEBPACK_IMPORTED_MODULE_5__.Vector3(-2, -2, -3.5)
   }],
   lightPos: [new three__WEBPACK_IMPORTED_MODULE_5__.Vector3(30, 0, 0)]
@@ -4391,7 +4396,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
 /* harmony export */ });
-/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (__webpack_require__.p + "7af3a692fb38408363499e16a3972b12.css");
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (__webpack_require__.p + "45b5ee888e49e17d916dc584ffec26da.css");
 
 /***/ }),
 
