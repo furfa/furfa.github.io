@@ -1250,9 +1250,9 @@ class PanoramaItem {
           window.GUI.__ul.removeChild(folder.domElement.parentNode);
 
           delete window.GUI.__folders["plane"];
-        }
+        } // addFloor(this.pano_obj);
 
-        (0,_SceneFunctions__WEBPACK_IMPORTED_MODULE_2__.addFloor)(this.pano_obj);
+
         this.first_look = false;
       }
 
@@ -1304,8 +1304,30 @@ class PanoramaItem {
           let npcFood = npc;
           npcFood.becameEaten();
         }
+      } else if (action == _TypedTools__WEBPACK_IMPORTED_MODULE_3__.AfterAction.UnlockLeaving) {
+        this.linking();
       }
     });
+  }
+
+  linking() {
+    console.log("linking!!!");
+
+    for (const {
+      dest,
+      pos
+    } of this.transition_edges) {
+      if (!window.PANORAMS[dest]) {
+        console.log(`panorama with name: "${dest}" not exist can't link`);
+        continue;
+      }
+
+      this.pano_obj.link(window.PANORAMS[dest], pos);
+      console.log("link to", dest);
+    } // panolens kostil
+
+
+    this.pano_obj.visible = true;
   }
 
   deleteNpcFromList(npc) {
@@ -1484,7 +1506,6 @@ class StatusBar {
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   "AfterAction": () => (/* binding */ AfterAction),
-/* harmony export */   "typeMain": () => (/* binding */ typeMain),
 /* harmony export */   "createOptions": () => (/* binding */ createOptions),
 /* harmony export */   "clearOptions": () => (/* binding */ clearOptions),
 /* harmony export */   "typeDialog": () => (/* binding */ typeDialog),
@@ -1496,34 +1517,128 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _tweenjs_tween_js__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(_tweenjs_tween_js__WEBPACK_IMPORTED_MODULE_1__);
 
 
-let AfterAction; // Globals for configuring typing
+let AfterAction;
 
 (function (AfterAction) {
   AfterAction[AfterAction["Leave"] = 0] = "Leave";
   AfterAction[AfterAction["Eat"] = 1] = "Eat";
   AfterAction[AfterAction["None"] = 2] = "None";
+  AfterAction[AfterAction["UnlockLeaving"] = 3] = "UnlockLeaving";
 })(AfterAction || (AfterAction = {}));
 
-let typeSpeed = 0;
+// Globals for configuring typing
+let typeSpeed = 1;
 let typedMain;
 let typedOptions = []; // Type message
 
-function typeMain(strings) {
-  console.log(strings);
+function balancer(string) {
+  let dialogueBox = document.querySelector("#typed-block");
+  let coordParameters = dialogueBox.getBoundingClientRect();
+  /*
+  DOMRect {
+      bottom: 177,
+      height: 54.7,
+      left: 278.5,​
+      right: 909.5,
+      top: 122.3,
+      width: 631,
+      x: 278.5,
+      y: 122.3,
+  }
+   */
+
+  console.log(coordParameters);
+  let height = coordParameters.height;
+  height = 150;
+  let width = coordParameters.width;
+  width = 750;
+  let letSize = parseInt(window.getComputedStyle(dialogueBox, null).getPropertyValue('font-size'));
+  let letOnPage = width * height / (letSize * letSize * 4);
+  console.log(`height: ${height},\nwidth: ${width}\nletSize: ${letSize}\nletOnPage: ${letOnPage}`);
+  let words = string.split(' ');
+  let strings = [];
+  let letter = '';
+  let currentLen = 0;
+
+  for (let word of words) {
+    if (word.length + currentLen < letOnPage) {
+      letter += ' ' + word;
+      currentLen += word.length;
+    } else {
+      strings.push(letter);
+      letter = '';
+      currentLen = 0;
+    }
+  }
+
+  if (letter != '') {
+    strings.push(letter);
+  }
+
+  console.log('strings: ', strings);
+  return strings;
+}
+
+async function typeMain(string, options_func) {
+  console.log(string);
+  let dialogueBox = document.querySelector("#dialog");
   typedMain && clearDialogue();
   showActionBox();
-  typedMain = new (typed_js__WEBPACK_IMPORTED_MODULE_0___default())('#typed', {
-    strings: ["", ...strings],
-    typeSpeed: typeSpeed,
-    showCursor: false
-  });
+  let messages = balancer(string);
+  let promises = [];
+
+  const getProm = index => {
+    if (index >= messages.length) return;
+    let message = messages[index];
+
+    if (index != messages.length - 1) {
+      message += "<br/>➡КЛИК➡";
+    } else {
+      return new Promise(resolve => {
+        typedMain = new (typed_js__WEBPACK_IMPORTED_MODULE_0___default())('#typed', {
+          strings: ["", message],
+          typeSpeed: typeSpeed,
+          showCursor: false,
+
+          onComplete(self) {
+            resolve();
+          }
+
+        });
+      });
+    }
+
+    return new Promise(resolve => {
+      typedMain = new (typed_js__WEBPACK_IMPORTED_MODULE_0___default())('#typed', {
+        strings: ["", message],
+        typeSpeed: typeSpeed,
+        showCursor: false
+      });
+
+      const clickHandler = () => {
+        resolve();
+        dialogueBox.removeEventListener("click", clickHandler, false);
+      };
+
+      dialogueBox.addEventListener("click", clickHandler, false);
+    }).then(() => getProm(index + 1));
+  };
+
+  await getProm(0);
+  await options_func(); // typedMain = new Typed('#typed', {
+  //     // strings: [balancer(string)],
+  //     strings: [string],
+  //     typeSpeed: typeSpeed,
+  //     showCursor: false,
+  // });
 } // Type response options
+
 
 function typeOption(options, selector) {
   console.log('options: ', options);
   let typedOption;
   typedOption = new (typed_js__WEBPACK_IMPORTED_MODULE_0___default())(`#${selector}`, {
-    strings: ["", ...options],
+    strings: [...options],
     typeSpeed: typeSpeed,
     showCursor: false
   });
@@ -1604,12 +1719,14 @@ async function typeDialog(replicas) {
   return new Promise(async resolve => {
     clearOptions();
     let replica = replicas[0];
-    let action = AfterAction.None;
+    let action = AfterAction.UnlockLeaving;
 
     while (true) {
-      typeMain([replica.text]);
-      renderOptions(replica.options);
-      let selectedOp = await createOptions(replica.options, replica.emojis);
+      let selectedOp;
+      await typeMain(replica.text, async () => {
+        renderOptions(replica.options);
+        selectedOp = await createOptions(replica.options, replica.emojis);
+      });
 
       if (selectedOp == null) {
         await sleep(2000);
@@ -1701,15 +1818,16 @@ const pano2_url = __webpack_require__(/*! ../img/pano2.jpg */ "./img/pano2.jpg")
 
 const pano_wellcome_url = __webpack_require__(/*! ../img/pano_wellcome.jpg */ "./img/pano_wellcome.jpg").default;
 
+const pano_prev_dickanat_url = __webpack_require__(/*! ../img/pano_prev_dickanat.jpg */ "./img/pano_prev_dickanat.jpg").default;
+
+const pano_dickanat_url = __webpack_require__(/*! ../img/pano_dickanat.jpg */ "./img/pano_dickanat.jpg").default;
+
 const steve_url = '../models/steve/scene.gltf'; // require('../models/steve/scene.gltf').default;
 
 const apple_url = '../models/apple/scene.gltf'; // require('../models/apple/scene.gltf').default;
 
-const sandwich_url = '../models/sandwich/sandwich.gltf'; // Try to maximize
-
-function download(url) {
-  window.location.href = url;
-}
+const sandwich_url = '../models/sandwich/sandwich.gltf';
+window.PANORAMS = {};
 
 function initWelcomeScreen(viewer, nextPano) {
   console.log('loading welcome screen');
@@ -1753,35 +1871,33 @@ function init() {
   const panoDiv = document.getElementById("pano-image");
   const viewer = new panolens__WEBPACK_IMPORTED_MODULE_6__.Viewer({
     container: panoDiv,
-    output: 'console'
+    output: 'console',
+    controlButtons: ['setting', 'video'],
+    autoHideInfospot: false
   }); // TODO:
   // - расширить интерфейс окна для добавления новых проперти
 
   window.DEBUG = true;
   if (window.DEBUG) window.GUI = new dat_gui__WEBPACK_IMPORTED_MODULE_7__.GUI();
-  let objects = {};
 
   for (let pan of panorams) {
     pan.setViewer(viewer);
-    viewer.add(pan.pano_obj); // pan.pano_obj.updateTexture( textures[pan.link] );
+    viewer.add(pan.pano_obj);
+    window.PANORAMS[pan.name] = pan.pano_obj;
+  } // for(let pan of panorams) pan.linking();
+  // init edges
+  // for(const pan of panorams) {
+  //     for(const {dest, pos} of pan.transition_edges) {
+  //
+  //         if(!objects[dest]) {
+  //             console.log(`panorama with name: "${dest}" not exist can't link`)
+  //             continue;
+  //         }
+  //
+  //         pan.pano_obj.link( window.PANORAMS[dest], pos );
+  //     }
+  // }
 
-    objects[pan.name] = pan.pano_obj;
-  } // init edges
-
-
-  for (const pan of panorams) {
-    for (const {
-      dest,
-      pos
-    } of pan.transition_edges) {
-      if (!objects[dest]) {
-        console.log(`panorama with name: "${dest}" not exist can't link`);
-        continue;
-      }
-
-      pan.pano_obj.link(objects[dest], pos);
-    }
-  }
 
   panorams[0].pano_obj.addEventListener('load', () => {
     // Фикс, чтобы панорма загружалась. Тк css грузится после js
@@ -1830,6 +1946,25 @@ const panorams = [new _PanoramaItem__WEBPACK_IMPORTED_MODULE_3__.PanoramaItem({
   transition_edges: [{
     dest: "hall_4f_1b",
     pos: new three__WEBPACK_IMPORTED_MODULE_5__.Vector3(-5000.00, -414.86, 131.79)
+  }, {
+    dest: "prev_dickanat_4f_1b",
+    pos: new three__WEBPACK_IMPORTED_MODULE_5__.Vector3(4975.25, -380.38, -187.13)
+  }],
+  enter_look_direction: new three__WEBPACK_IMPORTED_MODULE_5__.Vector3(-4808.73, -492.69, -1240.28),
+  npc_list: [{
+    npc: MAIN_NPC,
+    pos: new three__WEBPACK_IMPORTED_MODULE_5__.Vector3(100, 0, 40)
+  }],
+  lightPos: []
+}), new _PanoramaItem__WEBPACK_IMPORTED_MODULE_3__.PanoramaItem({
+  name: "prev_dickanat_4f_1b",
+  pano_url: pano_prev_dickanat_url,
+  transition_edges: [{
+    dest: "hall_4f_1b",
+    pos: new three__WEBPACK_IMPORTED_MODULE_5__.Vector3(-5000.00, -414.86, 131.79)
+  }, {
+    dest: "hall_4f_1b",
+    pos: new three__WEBPACK_IMPORTED_MODULE_5__.Vector3(4975.25, -380.38, -187.13)
   }],
   enter_look_direction: new three__WEBPACK_IMPORTED_MODULE_5__.Vector3(-4808.73, -492.69, -1240.28),
   npc_list: [{
@@ -4442,6 +4577,36 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
 /* harmony export */ });
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (__webpack_require__.p + "53346c4a63bdf208603f1ea92a453a0c.jpg");
+
+/***/ }),
+
+/***/ "./img/pano_dickanat.jpg":
+/*!*******************************!*\
+  !*** ./img/pano_dickanat.jpg ***!
+  \*******************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (__webpack_require__.p + "4efbd3965dee5523fb721cd37380e917.jpg");
+
+/***/ }),
+
+/***/ "./img/pano_prev_dickanat.jpg":
+/*!************************************!*\
+  !*** ./img/pano_prev_dickanat.jpg ***!
+  \************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (__webpack_require__.p + "badc10623a1cf4c26666ea32ca9a80c4.jpg");
 
 /***/ }),
 
