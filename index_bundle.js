@@ -976,7 +976,8 @@ class Food extends _NPC__WEBPACK_IMPORTED_MODULE_0__.NPC {
     y: 0.4,
     z: 0.4
   }) {
-    super(name, path, defaultActions);
+    super(name, path);
+    this.replicas = defaultActions;
     this.name = `food_${name}`;
     this.usualScale = scale;
     this.eatCost = eatCost;
@@ -1001,6 +1002,7 @@ class Food extends _NPC__WEBPACK_IMPORTED_MODULE_0__.NPC {
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "getReplicasByConfig": () => (/* binding */ getReplicasByConfig),
 /* harmony export */   "NPC": () => (/* binding */ NPC)
 /* harmony export */ });
 /* harmony import */ var three__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! three */ "./node_modules/three/build/three.module.js");
@@ -1016,33 +1018,29 @@ __webpack_require__.r(__webpack_exports__);
 
 
 
+async function getReplicasByConfig(filename) {
+  console.log('filename', filename);
+
+  if (!filename.endsWith(".json")) {
+    console.warn(`unable to parse ${filename} (need .json)`);
+    return null;
+  }
+
+  let response = await fetch(filename);
+  return await response.json();
+}
 const npcReplicasExample = [{
-  text: "привет! меня зовут ****! сегодня я тебе расскажу о лучшем факультете Новосибирского государственного университета-механико-математическом! Сейчас мы находимся на 4 этаже. пойдем, я тебе расскажу как тут всё устроено. ",
-  options: ["Люблю матфак и всё что с ним связано", "Матфак НЕ лучший факультет"],
+  text: "Это стандартный диалог. Если ты его видишь, что-то пошло не так...",
+  options: ["Ладно", "Текст"],
   emojis: ["128150", "128548"],
-  order: [1, 3]
-}, {
-  text: "Да, я тоже. Поэтому мы здесь.\n" + "Сзади тебя находится яблоко, съешь его!",
-  options: ["Зачем?", "Хорошая идея"],
-  emojis: ["128563", "128077"],
-  order: [2, -1]
-}, {
-  text: "Ты задаешь слишком много вопросов",
-  options: ["Диалог был написан в 12 часов ночи. спасибо за внимание"],
-  emojis: ["9851"],
-  order: [-1]
-}, {
-  text: "-20 social credits",
-  options: ["Звуки ярости", "Звуки справедливости"],
-  emojis: ["129324", "128519"],
   order: [-1, -1]
 }];
 class NPC {
-  constructor(name, path, replicas = npcReplicasExample) {
+  constructor(name, path, replicasPath = "") {
     this.name = `npc_${name}`;
     this.npc_obj = null;
     this.path = path;
-    this.replicas = replicas;
+    this.replicas_path = replicasPath;
     this.replica_i = 0;
     this.usualScale = {
       x: 0.8,
@@ -1052,7 +1050,13 @@ class NPC {
   }
 
   async load() {
-    if (this.npc_obj) return;
+    if (this.npc_obj) return; // load replicas
+
+    if (this.replicas_path != "") {
+      this.replicas = await getReplicasByConfig(this.replicas_path);
+    } // load model
+
+
     console.log("loading npc model");
 
     if (this.path.endsWith(".gltf")) {
@@ -1228,6 +1232,7 @@ class PanoramaItem {
   initScene() {
     // Enter event
     this.pano_obj.addEventListener('enter', () => {
+      this.linking();
       current_location = this.name;
       console.log(`entering "${current_location}"`);
       this.loadNPCs().then(() => this.moveNPCs());
@@ -1304,8 +1309,7 @@ class PanoramaItem {
           let npcFood = npc;
           npcFood.becameEaten();
         }
-      } else if (action == _TypedTools__WEBPACK_IMPORTED_MODULE_3__.AfterAction.UnlockLeaving) {
-        this.linking();
+      } else if (action == _TypedTools__WEBPACK_IMPORTED_MODULE_3__.AfterAction.UnlockLeaving) {// this.linking();
       }
     });
   }
@@ -1327,7 +1331,7 @@ class PanoramaItem {
     } // panolens kostil
 
 
-    this.pano_obj.visible = true;
+    this.pano_obj.visible = true; // this.pano_obj.isInfospotVisible = true;
   }
 
   deleteNpcFromList(npc) {
@@ -1818,6 +1822,23 @@ const pano2_url = __webpack_require__(/*! ../img/pano2.jpg */ "./img/pano2.jpg")
 
 const pano_wellcome_url = __webpack_require__(/*! ../img/pano_wellcome.jpg */ "./img/pano_wellcome.jpg").default;
 
+const pano1f2b_entry_url = __webpack_require__(/*! ../img/1f2b_entry.jpg */ "./img/1f2b_entry.jpg").default;
+
+const pano4_elev_url = __webpack_require__(/*! ../img/4_elev.jpg */ "./img/4_elev.jpg").default;
+
+const pano4_cava_new_url = __webpack_require__(/*! ../img/4_cava_new.jpg */ "./img/4_cava_new.jpg").default;
+
+const pano4_bookshare_url = __webpack_require__(/*! ../img/4_bookshare.jpg */ "./img/4_bookshare.jpg").default;
+
+const pano4_kbrd_url = __webpack_require__(/*! ../img/4_kbrd.jpg */ "./img/4_kbrd.jpg").default;
+
+const pano3_near_3107_url = __webpack_require__(/*! ../img/3_near_3107.jpg */ "./img/3_near_3107.jpg").default;
+
+const pano3_cafeteria_url = __webpack_require__(/*! ../img/3_cafeteria.jpg */ "./img/3_cafeteria.jpg").default;
+
+const pano3_cafeteria_galery_url = __webpack_require__(/*! ../img/3_cafeteria_galery.jpg */ "./img/3_cafeteria_galery.jpg").default; //3_cafeteria_galery
+
+
 const pano_prev_dickanat_url = __webpack_require__(/*! ../img/pano_prev_dickanat.jpg */ "./img/pano_prev_dickanat.jpg").default;
 
 const pano_dickanat_url = __webpack_require__(/*! ../img/pano_dickanat.jpg */ "./img/pano_dickanat.jpg").default;
@@ -1828,6 +1849,7 @@ const apple_url = '../models/apple/scene.gltf'; // require('../models/apple/scen
 
 const sandwich_url = '../models/sandwich/sandwich.gltf';
 window.PANORAMS = {};
+window.NPCS = {};
 
 function initWelcomeScreen(viewer, nextPano) {
   console.log('loading welcome screen');
@@ -1872,8 +1894,8 @@ function init() {
   const viewer = new panolens__WEBPACK_IMPORTED_MODULE_6__.Viewer({
     container: panoDiv,
     output: 'console',
-    controlButtons: ['setting', 'video'],
-    autoHideInfospot: false
+    controlButtons: ['setting', 'video'] // autoHideInfospot: false,
+
   }); // TODO:
   // - расширить интерфейс окна для добавления новых проперти
 
@@ -1907,7 +1929,7 @@ function init() {
   return viewer;
 } // TODO: Rewrite this hardcode to reading configs
 
-const MAIN_NPC = new _NPC__WEBPACK_IMPORTED_MODULE_1__.NPC("steve", steve_url); // export const MAIN_NPC = new NPC("steve", "../models/ded/Ch39_nonPBR.fbx");
+const MAIN_NPC = new _NPC__WEBPACK_IMPORTED_MODULE_1__.NPC("steve", steve_url, '../content/first-man.json'); // export const MAIN_NPC = new NPC("steve", "../models/ded/Ch39_nonPBR.fbx");
 
 const SANDWICH_FOOD = new _Food__WEBPACK_IMPORTED_MODULE_2__.Food("SANDWICH", sandwich_url, 1, {
   x: 0.1,
@@ -1925,11 +1947,11 @@ const panorams = [new _PanoramaItem__WEBPACK_IMPORTED_MODULE_3__.PanoramaItem({
   npc_list: [],
   lightPos: []
 }, false), new _PanoramaItem__WEBPACK_IMPORTED_MODULE_3__.PanoramaItem({
-  name: "hall_4f_1b",
-  pano_url: pano1_url,
+  name: "1f2b_entry",
+  pano_url: pano1f2b_entry_url,
   transition_edges: [{
-    dest: "after_cava_4f_1b",
-    pos: new three__WEBPACK_IMPORTED_MODULE_5__.Vector3(3047.29, -767.20, 3880.51)
+    dest: "4_elev",
+    pos: new three__WEBPACK_IMPORTED_MODULE_5__.Vector3(-4154.84, -788.19, -2654.85)
   }],
   enter_look_direction: new three__WEBPACK_IMPORTED_MODULE_5__.Vector3(4464.09, -738.67, 2113.00),
   npc_list: [{
@@ -1941,14 +1963,14 @@ const panorams = [new _PanoramaItem__WEBPACK_IMPORTED_MODULE_3__.PanoramaItem({
   }],
   lightPos: [new three__WEBPACK_IMPORTED_MODULE_5__.Vector3(30, 0, 0)]
 }), new _PanoramaItem__WEBPACK_IMPORTED_MODULE_3__.PanoramaItem({
-  name: "after_cava_4f_1b",
-  pano_url: pano2_url,
+  name: "4_elev",
+  pano_url: pano4_elev_url,
   transition_edges: [{
-    dest: "hall_4f_1b",
-    pos: new three__WEBPACK_IMPORTED_MODULE_5__.Vector3(-5000.00, -414.86, 131.79)
+    dest: "1f2b_entry",
+    pos: new three__WEBPACK_IMPORTED_MODULE_5__.Vector3(60.30, -1233.69, -4839.94)
   }, {
-    dest: "prev_dickanat_4f_1b",
-    pos: new three__WEBPACK_IMPORTED_MODULE_5__.Vector3(4975.25, -380.38, -187.13)
+    dest: "4_cava_new",
+    pos: new three__WEBPACK_IMPORTED_MODULE_5__.Vector3(3067.86, -595.19, 3890.01)
   }],
   enter_look_direction: new three__WEBPACK_IMPORTED_MODULE_5__.Vector3(-4808.73, -492.69, -1240.28),
   npc_list: [{
@@ -1957,14 +1979,94 @@ const panorams = [new _PanoramaItem__WEBPACK_IMPORTED_MODULE_3__.PanoramaItem({
   }],
   lightPos: []
 }), new _PanoramaItem__WEBPACK_IMPORTED_MODULE_3__.PanoramaItem({
-  name: "prev_dickanat_4f_1b",
-  pano_url: pano_prev_dickanat_url,
+  name: "4_cava_new",
+  pano_url: pano4_cava_new_url,
+  transition_edges: [{
+    dest: "4_bookshare",
+    pos: new three__WEBPACK_IMPORTED_MODULE_5__.Vector3(4789.58, -626.60, -1250.63)
+  }, {
+    dest: "4_elev",
+    pos: new three__WEBPACK_IMPORTED_MODULE_5__.Vector3(-4806.11, -368.91, 1299.47)
+  }],
+  enter_look_direction: new three__WEBPACK_IMPORTED_MODULE_5__.Vector3(-4808.73, -492.69, -1240.28),
+  npc_list: [{
+    npc: MAIN_NPC,
+    pos: new three__WEBPACK_IMPORTED_MODULE_5__.Vector3(100, 0, 40)
+  }],
+  lightPos: []
+}), new _PanoramaItem__WEBPACK_IMPORTED_MODULE_3__.PanoramaItem({
+  name: "4_bookshare",
+  pano_url: pano4_bookshare_url,
+  transition_edges: [{
+    dest: "4_kbrd",
+    pos: new three__WEBPACK_IMPORTED_MODULE_5__.Vector3(4745.97, 13.77, -1567.83)
+  }, {
+    dest: "4_cava_new",
+    pos: new three__WEBPACK_IMPORTED_MODULE_5__.Vector3(-4821.59, -123.44, 1278.92)
+  }],
+  enter_look_direction: new three__WEBPACK_IMPORTED_MODULE_5__.Vector3(-4808.73, -492.69, -1240.28),
+  npc_list: [{
+    npc: MAIN_NPC,
+    pos: new three__WEBPACK_IMPORTED_MODULE_5__.Vector3(100, 0, 40)
+  }],
+  lightPos: []
+}), new _PanoramaItem__WEBPACK_IMPORTED_MODULE_3__.PanoramaItem({
+  name: "4_kbrd",
+  pano_url: pano4_kbrd_url,
+  transition_edges: [{
+    dest: "3_near_3107",
+    pos: new three__WEBPACK_IMPORTED_MODULE_5__.Vector3(138.57, -346.01, -4979.14)
+  }, {
+    dest: "4_bookshare",
+    pos: new three__WEBPACK_IMPORTED_MODULE_5__.Vector3(-4711.32, -887.65, -1390.68)
+  }],
+  enter_look_direction: new three__WEBPACK_IMPORTED_MODULE_5__.Vector3(-4808.73, -492.69, -1240.28),
+  npc_list: [{
+    npc: MAIN_NPC,
+    pos: new three__WEBPACK_IMPORTED_MODULE_5__.Vector3(100, 0, 40)
+  }],
+  lightPos: []
+}), new _PanoramaItem__WEBPACK_IMPORTED_MODULE_3__.PanoramaItem({
+  name: "3_near_3107",
+  pano_url: pano3_near_3107_url,
+  transition_edges: [{
+    dest: "3_cafeteria",
+    pos: new three__WEBPACK_IMPORTED_MODULE_5__.Vector3(4988.09, -45.51, -193.11)
+  }, {
+    dest: "4_kbrd",
+    pos: new three__WEBPACK_IMPORTED_MODULE_5__.Vector3(-4821.59, -123.44, 1278.92)
+  }],
+  enter_look_direction: new three__WEBPACK_IMPORTED_MODULE_5__.Vector3(-4808.73, -492.69, -1240.28),
+  npc_list: [{
+    npc: MAIN_NPC,
+    pos: new three__WEBPACK_IMPORTED_MODULE_5__.Vector3(100, 0, 40)
+  }],
+  lightPos: []
+}), new _PanoramaItem__WEBPACK_IMPORTED_MODULE_3__.PanoramaItem({
+  name: "3_cafeteria",
+  pano_url: pano3_cafeteria_url,
+  transition_edges: [{
+    dest: "3_cafeteria_galery",
+    pos: new three__WEBPACK_IMPORTED_MODULE_5__.Vector3(4771.41, -1447.13, 219.43)
+  }, {
+    dest: "3_near_3107",
+    pos: new three__WEBPACK_IMPORTED_MODULE_5__.Vector3(676.16, -317.22, -4935.69)
+  }],
+  enter_look_direction: new three__WEBPACK_IMPORTED_MODULE_5__.Vector3(-4808.73, -492.69, -1240.28),
+  npc_list: [{
+    npc: MAIN_NPC,
+    pos: new three__WEBPACK_IMPORTED_MODULE_5__.Vector3(100, 0, 40)
+  }],
+  lightPos: []
+}), new _PanoramaItem__WEBPACK_IMPORTED_MODULE_3__.PanoramaItem({
+  name: "3_cafeteria_galery",
+  pano_url: pano3_cafeteria_galery_url,
   transition_edges: [{
     dest: "hall_4f_1b",
-    pos: new three__WEBPACK_IMPORTED_MODULE_5__.Vector3(-5000.00, -414.86, 131.79)
+    pos: new three__WEBPACK_IMPORTED_MODULE_5__.Vector3(4745.97, 13.77, -1567.83)
   }, {
-    dest: "hall_4f_1b",
-    pos: new three__WEBPACK_IMPORTED_MODULE_5__.Vector3(4975.25, -380.38, -187.13)
+    dest: "3_cafeteria",
+    pos: new three__WEBPACK_IMPORTED_MODULE_5__.Vector3(-363.07, -1106.21, -4854.96)
   }],
   enter_look_direction: new three__WEBPACK_IMPORTED_MODULE_5__.Vector3(-4808.73, -492.69, -1240.28),
   npc_list: [{
@@ -4532,6 +4634,126 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
 /* harmony export */ });
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (__webpack_require__.p + "0ecb76eb52d92a24824196a461ce541f.css");
+
+/***/ }),
+
+/***/ "./img/1f2b_entry.jpg":
+/*!****************************!*\
+  !*** ./img/1f2b_entry.jpg ***!
+  \****************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (__webpack_require__.p + "d399c755452083738a802733c862ccc3.jpg");
+
+/***/ }),
+
+/***/ "./img/3_cafeteria.jpg":
+/*!*****************************!*\
+  !*** ./img/3_cafeteria.jpg ***!
+  \*****************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (__webpack_require__.p + "1aecc04ca6e4a08afe25164e3b9cbc0a.jpg");
+
+/***/ }),
+
+/***/ "./img/3_cafeteria_galery.jpg":
+/*!************************************!*\
+  !*** ./img/3_cafeteria_galery.jpg ***!
+  \************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (__webpack_require__.p + "550c0c8d0575f32f98dca4da91eaf516.jpg");
+
+/***/ }),
+
+/***/ "./img/3_near_3107.jpg":
+/*!*****************************!*\
+  !*** ./img/3_near_3107.jpg ***!
+  \*****************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (__webpack_require__.p + "4ee3acbcedf00fd3ed9f40372693c6eb.jpg");
+
+/***/ }),
+
+/***/ "./img/4_bookshare.jpg":
+/*!*****************************!*\
+  !*** ./img/4_bookshare.jpg ***!
+  \*****************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (__webpack_require__.p + "325417065b36d701b1114738a8b478b7.jpg");
+
+/***/ }),
+
+/***/ "./img/4_cava_new.jpg":
+/*!****************************!*\
+  !*** ./img/4_cava_new.jpg ***!
+  \****************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (__webpack_require__.p + "fa9c94f69067ff96b257d9a0019f4ae1.jpg");
+
+/***/ }),
+
+/***/ "./img/4_elev.jpg":
+/*!************************!*\
+  !*** ./img/4_elev.jpg ***!
+  \************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (__webpack_require__.p + "9091439e0ada77db2ed43653551bcdcc.jpg");
+
+/***/ }),
+
+/***/ "./img/4_kbrd.jpg":
+/*!************************!*\
+  !*** ./img/4_kbrd.jpg ***!
+  \************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (__webpack_require__.p + "63b7a4764212628157e6e8bc23831d8a.jpg");
 
 /***/ }),
 
