@@ -971,6 +971,8 @@ const defaultActions = [{
   order: []
 }];
 class Food extends _NPC__WEBPACK_IMPORTED_MODULE_0__.NPC {
+  replicas_path = "";
+
   constructor(name, path, eatCost = 1, scale = {
     x: 0.4,
     y: 0.4,
@@ -1036,11 +1038,11 @@ const npcReplicasExample = [{
   order: [-1, -1]
 }];
 class NPC {
-  constructor(name, path, replicasPath = "") {
+  constructor(name, path) {
     this.name = `npc_${name}`;
     this.npc_obj = null;
     this.path = path;
-    this.replicas_path = replicasPath;
+    this.replicas_path = "";
     this.replica_i = 0;
     this.usualScale = {
       x: 0.8,
@@ -1049,14 +1051,18 @@ class NPC {
     };
   }
 
-  async load() {
-    if (this.npc_obj) return; // load replicas
+  setReplicasPath(path) {
+    this.replicas_path = path;
+  }
 
+  async load() {
+    // load replicas
     if (this.replicas_path != "") {
       this.replicas = await getReplicasByConfig(this.replicas_path);
     } // load model
 
 
+    if (this.npc_obj) return;
     console.log("loading npc model");
 
     if (this.path.endsWith(".gltf")) {
@@ -1220,12 +1226,22 @@ class PanoramaItem {
     }
   }
 
-  moveNPCs() {
+  moveNpcs() {
     for (let {
       npc,
       pos
     } of this.npc_list) {
       npc.move(pos);
+    }
+  }
+
+  setNpcDialogs() {
+    for (let {
+      npc,
+      pos,
+      dialogue
+    } of this.npc_list) {
+      if (dialogue) npc.setReplicasPath(dialogue);
     }
   }
 
@@ -1238,7 +1254,8 @@ class PanoramaItem {
       this.linking();
       current_location = this.name;
       console.log(`entering "${current_location}"`);
-      this.loadNPCs().then(() => this.moveNPCs());
+      this.setNpcDialogs();
+      this.loadNPCs().then(() => this.moveNpcs());
 
       if (this.first_look) {
         this.viewer.tweenControlCenter(this.enter_look_direction, 0);
@@ -1941,7 +1958,7 @@ function init() {
   return viewer;
 } // TODO: Rewrite this hardcode to reading configs
 
-const MAIN_NPC = new _NPC__WEBPACK_IMPORTED_MODULE_1__.NPC("steve", steve_url, '../content/first-man.json'); // export const MAIN_NPC = new NPC("steve", "../models/ded/Ch39_nonPBR.fbx");
+const MAIN_NPC = new _NPC__WEBPACK_IMPORTED_MODULE_1__.NPC("steve", steve_url); // export const MAIN_NPC = new NPC("steve", "../models/ded/Ch39_nonPBR.fbx");
 
 const SANDWICH_FOOD = new _Food__WEBPACK_IMPORTED_MODULE_2__.Food("SANDWICH", sandwich_url, 1, {
   x: 0.1,
@@ -1968,7 +1985,8 @@ const panorams = [new _PanoramaItem__WEBPACK_IMPORTED_MODULE_3__.PanoramaItem({
   enter_look_direction: new three__WEBPACK_IMPORTED_MODULE_5__.Vector3(4464.09, -738.67, 2113.00),
   npc_list: [{
     npc: MAIN_NPC,
-    pos: new three__WEBPACK_IMPORTED_MODULE_5__.Vector3(20, 0, 40)
+    pos: new three__WEBPACK_IMPORTED_MODULE_5__.Vector3(20, 0, 40),
+    dialogue: '../content/1f2b.json'
   }, {
     npc: SANDWICH_FOOD,
     pos: new three__WEBPACK_IMPORTED_MODULE_5__.Vector3(-2, -2, -3.5)
@@ -1987,7 +2005,8 @@ const panorams = [new _PanoramaItem__WEBPACK_IMPORTED_MODULE_3__.PanoramaItem({
   enter_look_direction: new three__WEBPACK_IMPORTED_MODULE_5__.Vector3(-4808.73, -492.69, -1240.28),
   npc_list: [{
     npc: MAIN_NPC,
-    pos: new three__WEBPACK_IMPORTED_MODULE_5__.Vector3(100, 0, 40)
+    pos: new three__WEBPACK_IMPORTED_MODULE_5__.Vector3(100, 0, 40),
+    dialogue: '../content/4_elev.json'
   }],
   lightPos: []
 }), new _PanoramaItem__WEBPACK_IMPORTED_MODULE_3__.PanoramaItem({
