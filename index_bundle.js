@@ -1232,6 +1232,9 @@ class PanoramaItem {
   initScene() {
     // Enter event
     this.pano_obj.addEventListener('enter', () => {
+      let progressElement = document.getElementById('progress');
+      progressElement.style.width = "0";
+      progressElement.classList.remove('finish');
       this.linking();
       current_location = this.name;
       console.log(`entering "${current_location}"`);
@@ -1262,6 +1265,15 @@ class PanoramaItem {
       }
 
       console.log('init scene', this);
+    });
+    this.pano_obj.addEventListener('progress', event => {
+      let progressElement = document.getElementById('progress');
+      let progress = event.progress.loaded / event.progress.total * 100;
+      progressElement.style.width = progress + '%';
+
+      if (progress === 100) {
+        progressElement.classList.add('finish');
+      }
     }); // Leave event
 
     this.pano_obj.addEventListener('leave', () => {
@@ -4633,7 +4645,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
 /* harmony export */ });
-/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (__webpack_require__.p + "0ecb76eb52d92a24824196a461ce541f.css");
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (__webpack_require__.p + "c0e232e316650861a86cddc5f3a0cdcf.css");
 
 /***/ }),
 
